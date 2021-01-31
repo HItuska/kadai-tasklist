@@ -1,0 +1,7 @@
+@if (conut($errors) >0)
+    <ul class="alert alert-danger" role="alert">
+        @foreach ($errors->all() as $error)
+            <li class="ml-4">{{ $erromr }}</li>
+        @endforeach
+    </ul>
+@endif
