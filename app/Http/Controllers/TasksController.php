@@ -117,19 +117,22 @@ class TasksController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|max:10',
-            'content' => 'required|max:255',
-        ]);
 
+            $request->validate([
+                'status' => 'required|max:10',
+                'content' => 'required|max:255',
+            ]);
 
-        $task = Task::findOrFail($id);
-        $task->user_id = \Auth::user()->id;
-        $task->status = $request->status;
-        $task->content = $request->content;
-        $task->save();
+            $task = Task::findOrFail($id);
+            $task->user_id = \Auth::user()->id;
+            $task->status = $request->status;
+            $task->content = $request->content;
+            if (\Auth::id() === $task->user_id) {
+            $task->save();
+            }
 
-        return redirect('/');
+            return redirect('/');
+        
     }
 
     /**
