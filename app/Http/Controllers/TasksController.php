@@ -124,6 +124,7 @@ class TasksController extends Controller
 
 
         $task = Task::findOrFail($id);
+        $task->user_id = \Auth::user()->id;
         $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
