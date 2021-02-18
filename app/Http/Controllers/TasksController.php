@@ -15,12 +15,21 @@ class TasksController extends Controller
      */
     public function index()
     {
-        $tasks = Task::orderBy('id', 'desc')->paginate(25);
+        $data = [];
+        if(\Auth::check()) {
+        $user = \Auth::user();  
         
-        return view('tasks.index',[
+        $tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(10);
+        //$tasks = Task::orderBy('id', 'desc')->paginate(25);//
+        $data =[
+            'user' => $user,
+            'tasks' => $tasks,
+            ];
+        };
+        return view('welcome', $data);
+        /*return view('tasks.index',[
                 'tasks' => $tasks,
-            ]);
-        //
+            ]);*/
     }
 
     /**
@@ -45,12 +54,14 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
-         $request->validate([
+        $request->validate([
             'status' => 'required|max:10',
             'content' => 'required|max:255',
         ]);
         
+        
         $task = new Task;
+        $task->user_id = \Auth::user()->id;
         $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
@@ -68,9 +79,14 @@ class TasksController extends Controller
     {
         $task = Task::findOrFail($id);
 
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -82,10 +98,14 @@ class TasksController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() === $task->user_id) {
+             return view('tasks.edit', [
+              'task' => $task,
+           ]);
+        }
+        else{
+            return redirect('/');
+        }
     }
 
     /**
@@ -121,7 +141,9 @@ class TasksController extends Controller
     {
         $task = Task::findOrFail($id);
         // メッセージを削除
-        $task->delete();
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');
